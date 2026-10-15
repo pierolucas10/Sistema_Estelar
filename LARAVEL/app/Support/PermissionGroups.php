@@ -22,7 +22,7 @@ class PermissionGroups
             'Asistencias'    => ['asistencias.ver', 'asistencias.registrar', 'asistencias.gestionar'],
             'Solicitudes'    => ['solicitudes.ver', 'solicitudes.crear', 'solicitudes.gestionar'],
             // Todo permiso debe estar en algún grupo: al guardar un rol se sincroniza solo lo que se muestra.
-            'Reportes diarios' => ['reportes_diarios.ver', 'reportes_diarios.crear', 'reportes_diarios.horario', 'reportes_diarios.gestionar'],
+            'Reportes diarios' => ['reportes_diarios.horario', 'reportes_diarios.crear', 'reportes_diarios.ver', 'reportes_diarios.gestionar', 'reportes_diarios.revisar'],
             'Reportes (análisis)' => ['reportes.ver', 'reportes.exportar'],
             'Configuración'  => ['configuracion.ver', 'configuracion.editar'],
             'Usuarios'       => ['usuarios.ver', 'usuarios.crear', 'usuarios.editar', 'usuarios.eliminar'],
@@ -60,6 +60,7 @@ class PermissionGroups
         'reportes_diarios.crear'     => 'Crear reporte del día',
         'reportes_diarios.horario'   => 'Crear horarios',
         'reportes_diarios.gestionar' => 'Ver los de todo el equipo',
+        'reportes_diarios.revisar'   => 'Revisar reportes (gerencia)',
     ];
 
     public static function etiqueta(string $permiso): string

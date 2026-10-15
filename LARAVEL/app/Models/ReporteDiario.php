@@ -22,6 +22,11 @@ class ReporteDiario extends Model
         'impedimentos',
         'plan_siguiente_dia',
         'archivo_adjunto',
+        'estado_revision',
+        'observacion_revision',
+        'revisado_por',
+        'revisado_at',
+        'subsanado_at',
     ];
 
     protected $casts = [
@@ -29,6 +34,17 @@ class ReporteDiario extends Model
         'tareas'      => 'array',
         'impedimentos'=> 'array',
         'horas_trabajadas' => 'decimal:1',
+        'revisado_at'  => 'datetime',
+        'subsanado_at' => 'datetime',
+    ];
+
+    /** Revisión de gerencia. «Subsanado» = el colaborador corrigió una observación y vuelve a revisión. */
+    const ESTADOS_REVISION = [
+        'pendiente' => 'Por revisar',
+        'revisado'  => 'Revisado',
+        'observado' => 'Observado',
+        'subsanado' => 'Subsanado',
+        'rechazado' => 'Rechazado',
     ];
 
     const AREAS = [
@@ -45,6 +61,45 @@ class ReporteDiario extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function revisadoPor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'revisado_por');
+    }
+
+    public function revisiones(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ReporteRevision::class)->latest();
+    }
+
+    public function estadoRevisionLabel(): string
+    {
+        return self::ESTADOS_REVISION[$this->estado_revision] ?? (string) $this->estado_revision;
+    }
+
+    /** Color de píldora (estilos pf-pill). */
+    public function estadoRevisionColor(): string
+    {
+        return match ($this->estado_revision) {
+            'revisado'  => 'green',
+            'observado' => 'amber',
+            'subsanado' => 'violet',
+            'rechazado' => 'red',
+            default     => 'sky',
+        };
+    }
+
+    /** Espera la revisión de gerencia: es nuevo o ya fue subsanado. */
+    public function porRevisar(): bool
+    {
+        return in_array($this->estado_revision, ['pendiente', 'subsanado'], true);
+    }
+
+    /** El colaborador debe corregirlo. */
+    public function debeSubsanar(): bool
+    {
+        return $this->estado_revision === 'observado';
     }
 
     /** Bloques del horario de los que rinde cuentas este reporte. */

@@ -19,7 +19,7 @@ class ReporteDiarioController extends Controller
         $this->authorize('viewAny', ReporteDiario::class);
 
         $user = auth()->user();
-        $esGestor = $user->hasPermissionTo('reportes_diarios.gestionar');
+        $esGestor = $user->hasAnyPermission(['reportes_diarios.gestionar', 'reportes_diarios.revisar']);
 
         $query = ReporteDiario::with('user')
             ->withCount('bloques')
@@ -28,6 +28,9 @@ class ReporteDiarioController extends Controller
             ->when($request->fecha_desde, fn($q, $v) => $q->whereDate('fecha', '>=', $v))
             ->when($request->fecha_hasta, fn($q, $v) => $q->whereDate('fecha', '<=', $v))
             ->when($request->user_id && $esGestor, fn($q, $v) => $q->where('user_id', $v))
+            ->when($request->revision, fn($q, $v) => $v === 'por_revisar'
+                ? $q->whereIn('estado_revision', ['pendiente', 'subsanado'])
+                : $q->where('estado_revision', $v))
             ->orderByDesc('fecha')
             ->orderByDesc('created_at');
 
@@ -138,9 +141,116 @@ class ReporteDiarioController extends Controller
     {
         $this->authorize('view', $reportes_diario);
 
-        $reportes_diario->load(['user', 'bloques.archivos', 'bloques.project:id,name']);
+        $reportes_diario->load(['user', 'bloques.archivos', 'bloques.project:id,name', 'revisiones.user:id,name', 'revisadoPor:id,name']);
 
         return view('reportes_diarios.show', ['reporte' => $reportes_diario]);
+    }
+
+    /** Gerencia: revisado, observado (se debe subsanar) o rechazado. */
+    public function revisar(Request $request, ReporteDiario $reportes_diario)
+    {
+        $this->authorize('revisar', $reportes_diario);
+
+        $data = $request->validate([
+            'accion'     => ['required', 'in:revisado,observado,rechazado'],
+            'comentario' => ['nullable', 'required_if:accion,observado,rechazado', 'string', 'max:3000'],
+        ], [
+            'comentario.required_if' => 'Escribe qué debe corregir (observado) o el motivo (rechazado).',
+        ]);
+
+        DB::transaction(function () use ($reportes_diario, $data) {
+            $reportes_diario->update([
+                'estado_revision'      => $data['accion'],
+                'observacion_revision' => $data['comentario'] ?? null,
+                'revisado_por'         => auth()->id(),
+                'revisado_at'          => now(),
+            ]);
+            $reportes_diario->revisiones()->create([
+                'user_id'    => auth()->id(),
+                'accion'     => $data['accion'],
+                'comentario' => $data['comentario'] ?? null,
+            ]);
+        });
+
+        $mensajes = [
+            'revisado'  => 'Reporte marcado como revisado.',
+            'observado' => 'Reporte observado: el colaborador recibirá el aviso para subsanarlo.',
+            'rechazado' => 'Reporte rechazado.',
+        ];
+
+        return redirect()->route('reportes_diarios.show', $reportes_diario)->with('success', $mensajes[$data['accion']]);
+    }
+
+    /** Formulario para subsanar un reporte observado. */
+    public function subsanarForm(ReporteDiario $reportes_diario)
+    {
+        $this->authorize('subsanar', $reportes_diario);
+
+        $reportes_diario->load(['bloques.archivos', 'bloques.project:id,name', 'revisadoPor:id,name']);
+
+        return view('reportes_diarios.subsanar', ['reporte' => $reportes_diario]);
+    }
+
+    /** El colaborador corrige lo observado y el reporte vuelve a gerencia como «Subsanado». */
+    public function subsanar(Request $request, ReporteDiario $reportes_diario)
+    {
+        $this->authorize('subsanar', $reportes_diario);
+
+        $ids = $reportes_diario->bloques()->pluck('id')->map(fn ($id) => (string) $id)->all();
+
+        $data = $request->validate([
+            'respuesta'                 => ['required', 'string', 'max:3000'],
+            'logros_destacados'         => ['nullable', 'string', 'max:2000'],
+            'plan_siguiente_dia'        => ['nullable', 'string', 'max:2000'],
+            'bloques'                   => [count($ids) ? 'required' : 'nullable', 'array'],
+            'bloques.*.estado'          => ['required', 'in:cumplido,parcial,no_cumplido'],
+            'bloques.*.detalle'         => ['nullable', 'required_if:bloques.*.estado,cumplido,parcial', 'string', 'max:3000'],
+            'bloques.*.justificacion'   => ['nullable', 'required_if:bloques.*.estado,parcial,no_cumplido', 'string', 'max:2000'],
+            'bloques.*.archivos'        => ['nullable', 'array', 'max:8'],
+            'bloques.*.archivos.*'      => ['file', 'max:10240', 'mimes:jpg,jpeg,png,webp,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,txt'],
+        ], [
+            'respuesta.required'                  => 'Explica qué corregiste respecto a la observación.',
+            'bloques.*.detalle.required_if'       => 'Cuenta qué hiciste en cada bloque cumplido o parcial.',
+            'bloques.*.justificacion.required_if' => 'Justifica por qué no se completó cada bloque parcial o no cumplido.',
+        ]);
+
+        if (array_diff(array_keys($data['bloques'] ?? []), $ids)) {
+            return back()->withInput()->withErrors(['bloques' => 'Hay bloques que no pertenecen a este reporte.']);
+        }
+
+        DB::transaction(function () use ($request, $reportes_diario, $data) {
+            foreach ($data['bloques'] ?? [] as $bloqueId => $info) {
+                $bloque = $reportes_diario->bloques()->findOrFail($bloqueId);
+                $bloque->update([
+                    'estado'        => $info['estado'],
+                    'detalle'       => $info['detalle'] ?? null,
+                    'justificacion' => $info['justificacion'] ?? null,
+                ]);
+                foreach ($request->file("bloques.{$bloqueId}.archivos", []) as $archivo) {
+                    $bloque->archivos()->create([
+                        'nombre' => mb_substr($archivo->getClientOriginalName(), 0, 255),
+                        'path'   => $archivo->store("reportes_diarios/bloques/{$bloque->id}", 'private'),
+                        'mime'   => $archivo->getClientMimeType(),
+                        'size'   => $archivo->getSize(),
+                    ]);
+                }
+            }
+
+            $reportes_diario->update([
+                'logros_destacados'  => $data['logros_destacados'] ?? $reportes_diario->logros_destacados,
+                'plan_siguiente_dia' => $data['plan_siguiente_dia'] ?? $reportes_diario->plan_siguiente_dia,
+                'estado_revision'    => 'subsanado',
+                'subsanado_at'       => now(),
+            ]);
+            $reportes_diario->revisiones()->create([
+                'user_id'    => auth()->id(),
+                'accion'     => 'subsanado',
+                'comentario' => $data['respuesta'],
+            ]);
+        });
+
+        return redirect()->route('reportes_diarios.show', $reportes_diario)
+            ->with('success', 'Reporte subsanado. Gerencia lo volverá a revisar.');
     }
 
     public function descargarAdjunto(ReporteDiario $reportes_diario)

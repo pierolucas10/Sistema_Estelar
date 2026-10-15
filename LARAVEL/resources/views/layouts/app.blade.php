@@ -393,6 +393,9 @@
         @can('solicitudes.gestionar')
         <livewire:notificaciones-solicitudes />
         @endcan
+        @canany(['reportes_diarios.crear', 'reportes_diarios.revisar'])
+        <livewire:notificaciones-reportes />
+        @endcanany
         @can('leads.ver')
         <livewire:notificaciones-reuniones />
         @persist('lead-alarm')

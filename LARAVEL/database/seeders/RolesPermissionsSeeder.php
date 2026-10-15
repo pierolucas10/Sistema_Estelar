@@ -103,6 +103,7 @@ class RolesPermissionsSeeder extends Seeder
             'reportes_diarios.ver',       // ver propios reportes
             'reportes_diarios.crear',     // crear reporte del día
             'reportes_diarios.horario',   // crear horarios (cronograma de bloques)
+            'reportes_diarios.revisar',   // gerencia: revisado / observado / rechazado
             'reportes_diarios.gestionar', // ver todos los reportes del equipo
 
             // Eventos (ferias / campañas) y captura de leads

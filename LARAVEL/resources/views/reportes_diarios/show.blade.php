@@ -37,6 +37,13 @@
 
     <div class="max-w-4xl space-y-5">
 
+        @if($errors->any() && !$errors->has('comentario'))
+        <div class="flash-error">{{ $errors->first() }}</div>
+        @endif
+
+        {{-- ── REVISIÓN DE GERENCIA ─────────────────────────────────────── --}}
+        @include('reportes_diarios.partials.revision')
+
         {{-- ── DATOS DEL COLABORADOR ───────────────────────────────────── --}}
         <div class="card p-6">
             <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">

@@ -331,6 +331,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/reportes-diarios/horario',                      [HorarioController::class, 'store'])->middleware('permission:reportes_diarios.horario')->name('reportes_diarios.horario.store');
     Route::delete('/reportes-diarios/horario/{bloque}',           [HorarioController::class, 'destroy'])->middleware('permission:reportes_diarios.horario|reportes_diarios.gestionar')->name('reportes_diarios.horario.destroy');
     Route::patch('/reportes-diarios/horario/{bloque}/justificar', [HorarioController::class, 'justificar'])->middleware('permission:reportes_diarios.crear')->name('reportes_diarios.horario.justificar');
+    // Revisión de gerencia y subsanación de observaciones
+    Route::patch('/reportes-diarios/{reportes_diario}/revisar',  [ReporteDiarioController::class, 'revisar'])->middleware('permission:reportes_diarios.revisar')->name('reportes_diarios.revisar');
+    Route::get('/reportes-diarios/{reportes_diario}/subsanar',   [ReporteDiarioController::class, 'subsanarForm'])->middleware('permission:reportes_diarios.crear')->name('reportes_diarios.subsanar');
+    Route::put('/reportes-diarios/{reportes_diario}/subsanar',   [ReporteDiarioController::class, 'subsanar'])->middleware('permission:reportes_diarios.crear')->name('reportes_diarios.subsanar.update');
     Route::get('/reportes-diarios/evidencias/{archivo}',          [HorarioController::class, 'archivo'])->middleware('permission:reportes_diarios.ver|reportes_diarios.crear|reportes_diarios.gestionar')->name('reportes_diarios.evidencia');
     Route::post('/reportes-diarios',                   [ReporteDiarioController::class, 'store'])->middleware('permission:reportes_diarios.crear')->name('reportes_diarios.store');
     Route::get('/reportes-diarios/{reportes_diario}',  [ReporteDiarioController::class, 'show'])->middleware('permission:reportes_diarios.ver|reportes_diarios.gestionar')->name('reportes_diarios.show');

@@ -60,7 +60,16 @@
         <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" onchange="this.form.submit()"
                class="bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-sky-500">
 
-        @if(request('area') || request('user_id') || request('fecha_desde') || request('fecha_hasta'))
+        <select name="revision" onchange="this.form.submit()"
+                class="bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-sky-500">
+            <option value="">Toda revisión</option>
+            <option value="por_revisar" @selected(request('revision') === 'por_revisar')>Por revisar (nuevos y subsanados)</option>
+            @foreach(\App\Models\ReporteDiario::ESTADOS_REVISION as $val => $label)
+                <option value="{{ $val }}" @selected(request('revision') === $val)>{{ $label }}</option>
+            @endforeach
+        </select>
+
+        @if(request('area') || request('user_id') || request('fecha_desde') || request('fecha_hasta') || request('revision'))
             <a href="{{ route('reportes_diarios.index') }}"
                class="text-sm text-slate-400 hover:text-white px-3 py-2 transition-colors">
                 Limpiar filtros
@@ -83,6 +92,7 @@
                     <th class="th-cell text-center">Completadas</th>
                     <th class="th-cell text-center">Horas</th>
                     <th class="th-cell text-center">Impedimentos</th>
+                    <th class="th-cell text-center">Revisión</th>
                     <th class="th-cell w-10"></th>
                 </tr>
             </thead>
@@ -145,6 +155,9 @@
                             <span class="text-slate-600">—</span>
                         @endif
                     </td>
+                    <td class="td-cell text-center">
+                        <span class="pf"><span class="pf-pill pf-pill--{{ $r->estadoRevisionColor() }}">{{ $r->estadoRevisionLabel() }}</span></span>
+                    </td>
                     <td class="td-cell">
                         <a href="{{ route('reportes_diarios.show', $r) }}"
                            class="text-slate-400 hover:text-sky-400 transition-colors">
@@ -156,7 +169,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="{{ $esGestor ? 9 : 8 }}" class="td-cell text-center py-16 text-slate-500">
+                    <td colspan="{{ $esGestor ? 10 : 9 }}" class="td-cell text-center py-16 text-slate-500">
                         <svg class="w-10 h-10 mx-auto mb-3 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
                         </svg>
