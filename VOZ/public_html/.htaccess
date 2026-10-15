@@ -1,0 +1,46 @@
+# ============================================================
+#  Estelar · reglas de Apache / LiteSpeed para public_html
+# ============================================================
+
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1) HTTPS obligatorio (se deja libre /.well-known para que AutoSSL / Let's Encrypt validen el dominio)
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 2) Bloquear archivos ocultos (.git, .htaccess...) excepto /.well-known
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteRule (^|/)\. - [F,L]
+
+    # 3) Bloquear extensiones sensibles por si alguien sube algo por error
+    RewriteRule \.(env|ini|log|sql|sh|bak|old|orig|swp|dist|md|lock|json|yml|yaml|zip|tar|gz)$ - [F,NC,L]
+</IfModule>
+
+# Respaldo si mod_rewrite no está disponible
+<FilesMatch "(^\.|\.(env|ini|log|sql|sh|bak|old|orig|swp|dist|md|lock|yml|yaml)$)">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always unset X-Powered-By
+    # Archivos estáticos con caché larga (las URLs llevan ?v=fecha, así que se renuevan solas)
+    <FilesMatch "\.(css|js|svg|png|jpg|webp|woff2)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml text/csv
+</IfModule>
+
+ErrorDocument 403 "Acceso denegado"
+ErrorDocument 404 "Página no encontrada"

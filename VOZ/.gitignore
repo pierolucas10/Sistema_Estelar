@@ -1,0 +1,11 @@
+logs/*
+!logs/.htaccess
+!logs/.gitignore
+storage/*
+!storage/.htaccess
+!storage/.gitignore
+.DS_Store
+Thumbs.db
+
+# Credenciales reales (usar config/database.example.php como plantilla)
+config/database.php

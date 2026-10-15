@@ -1,0 +1,62 @@
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Third Party Services
+    |--------------------------------------------------------------------------
+    |
+    | This file is for storing the credentials for third party services such
+    | as Mailgun, Postmark, AWS and more. This file provides the de facto
+    | location for this type of information, allowing packages to have
+    | a conventional file to locate the various service credentials.
+    |
+    */
+
+    'postmark' => [
+        'key' => env('POSTMARK_API_KEY'),
+    ],
+
+    'resend' => [
+        'key' => env('RESEND_API_KEY'),
+    ],
+
+    'ses' => [
+        'key' => env('AWS_ACCESS_KEY_ID'),
+        'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+    ],
+
+    'slack' => [
+        'notifications' => [
+            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
+            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+        ],
+    ],
+
+    'apis_net_pe' => [
+        'token' => env('APIS_NET_PE_TOKEN', ''),
+        'url'   => 'https://api.apis.net.pe/v1',
+    ],
+
+    // ── API de Facturación Electrónica SUNAT ─────────────────────────
+    'sunat_api' => [
+        'url'        => env('SUNAT_API_URL', 'http://localhost:8001'),
+        'token'      => env('SUNAT_API_TOKEN', ''),
+        'company_id' => env('SUNAT_API_COMPANY_ID', 1),
+        'branch_id'  => env('SUNAT_API_BRANCH_ID', 1),
+        'timeout'    => env('SUNAT_API_TIMEOUT', 30),
+    ],
+
+    // ── Prospección por voz (VOZ/, PHP aparte con su propia BD) ──────
+    // El ingreso es por token firmado: VOZ_SSO_SECRET debe ser igual a
+    // 'sso_secreto' de VOZ/config/database.php.
+    'voz' => [
+        'url'         => rtrim((string) env('VOZ_URL', ''), '/'),
+        'sso_secret'  => env('VOZ_SSO_SECRET', ''),
+        // Roles de Estelar que entran a VOZ como administrador; el resto, como asesor.
+        'roles_admin' => ['super-admin', 'administrativo'],
+    ],
+
+];

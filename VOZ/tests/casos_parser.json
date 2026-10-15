@@ -1,0 +1,558 @@
+{
+  "rubros": [
+    {
+      "id": 1,
+      "nombre": "Educación"
+    },
+    {
+      "id": 2,
+      "nombre": "Salud"
+    },
+    {
+      "id": 3,
+      "nombre": "Construcción"
+    },
+    {
+      "id": 4,
+      "nombre": "Comercio"
+    },
+    {
+      "id": 5,
+      "nombre": "Restaurantes"
+    },
+    {
+      "id": 6,
+      "nombre": "Transporte"
+    },
+    {
+      "id": 7,
+      "nombre": "Inmobiliaria"
+    },
+    {
+      "id": 8,
+      "nombre": "Tecnología"
+    },
+    {
+      "id": 9,
+      "nombre": "Servicios"
+    },
+    {
+      "id": 10,
+      "nombre": "Otros"
+    }
+  ],
+  "casos": [
+    {
+      "descripcion": "Perú en letras dígito a dígito, con rubro",
+      "frase": "cinco uno nueve cinco cuatro cero uno seis ocho tres seis, interesado, rubro educación",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "telefono_e164": "+51954016836",
+        "telefono_local": "954016836",
+        "estado": "interesado",
+        "rubro": "Educación",
+        "rubro_id": 1
+      }
+    },
+    {
+      "descripcion": "Perú en dígitos, reunión",
+      "frase": "51954016836 reunión rubro salud",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "telefono_e164": "+51954016836",
+        "estado": "reunion",
+        "rubro": "Salud"
+      }
+    },
+    {
+      "descripcion": "Colombia con 'cincuenta y siete'",
+      "frase": "cincuenta y siete tres cero dos dos cuatro dos cinco tres cuatro cero, interesado, rubro construcción",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "telefono_e164": "+573022425340",
+        "telefono_local": "3022425340",
+        "estado": "interesado",
+        "rubro": "Construcción"
+      }
+    },
+    {
+      "descripcion": "Colombia en dígitos, no interesado sin rubro",
+      "frase": "573022425340 no interesado",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "telefono_e164": "+573022425340",
+        "estado": "no_interesado",
+        "rubro": null
+      }
+    },
+    {
+      "descripcion": "Colombia con 'más' y centenas",
+      "frase": "más cincuenta y siete trescientos dos dos cuatro dos cinco tres cuatro cero, medio interesado",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "telefono_e164": "+573022425340",
+        "estado": "medio_interesado",
+        "rubro": null
+      }
+    },
+    {
+      "descripcion": "Mezcla de dígitos y palabras (como lo devuelve el reconocedor)",
+      "frase": "5 uno 9 cinco 4 cero 1 seis 8 tres 6 interesado rubro comercio",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "telefono_e164": "+51954016836",
+        "estado": "interesado",
+        "rubro": "Comercio"
+      }
+    },
+    {
+      "descripcion": "Símbolo + y grupos de dígitos, 'agendar' = reunión",
+      "frase": "+51 954 016 836 agendar rubro inmobiliaria",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "telefono_e164": "+51954016836",
+        "estado": "reunion",
+        "rubro": "Inmobiliaria"
+      }
+    },
+    {
+      "descripcion": "Perú con decenas y centenas habladas, 'tal vez'",
+      "frase": "cincuenta y uno novecientos cincuenta y cuatro cero dieciséis ochenta y tres seis, tal vez, rubro restaurantes",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "telefono_e164": "+51954016836",
+        "estado": "medio_interesado",
+        "rubro": "Restaurantes"
+      }
+    },
+    {
+      "descripcion": "Doble y triple",
+      "frase": "cinco uno nueve doble cinco triple cuatro uno dos tres, interesado",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "telefono_e164": "+51955444123",
+        "estado": "interesado"
+      }
+    },
+    {
+      "descripcion": "Palabras de relleno y 'cita'",
+      "frase": "el número es 57 300 123 4567 cita rubro tecnología",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "telefono_e164": "+573001234567",
+        "estado": "reunion",
+        "rubro": "Tecnología"
+      }
+    },
+    {
+      "descripcion": "'no le interesa'",
+      "frase": "573001234567, no le interesa, rubro transporte",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "estado": "no_interesado",
+        "rubro": "Transporte"
+      }
+    },
+    {
+      "descripcion": "'no está interesado'",
+      "frase": "51987654321 no está interesado rubro servicios",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "telefono_e164": "+51987654321",
+        "estado": "no_interesado",
+        "rubro": "Servicios"
+      }
+    },
+    {
+      "descripcion": "'más o menos' no se confunde con el 'más' inicial",
+      "frase": "51987654321 más o menos rubro salud",
+      "esperado": {
+        "valido": true,
+        "estado": "medio_interesado",
+        "rubro": "Salud"
+      }
+    },
+    {
+      "descripcion": "'lo pensará' sin rubro",
+      "frase": "51987654321 lo pensará",
+      "esperado": {
+        "valido": true,
+        "estado": "medio_interesado",
+        "rubro": null
+      }
+    },
+    {
+      "descripcion": "Palabra 'sector' en lugar de rubro, 'agendado'",
+      "frase": "573151234567 agendado sector educación",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "telefono_e164": "+573151234567",
+        "estado": "reunion",
+        "rubro": "Educación"
+      }
+    },
+    {
+      "descripcion": "'giro' y singular contra plural del catálogo",
+      "frase": "573151234567 interesada giro restaurante",
+      "esperado": {
+        "valido": true,
+        "estado": "interesado",
+        "rubro": "Restaurantes",
+        "rubro_id": 5,
+        "rubro_nuevo": false
+      }
+    },
+    {
+      "descripcion": "Rubro dictado en plural y sin tilde",
+      "frase": "51 nueve cinco cuatro cero uno seis ocho tres seis medio interesado rubro tecnologias",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "estado": "medio_interesado",
+        "rubro": "Tecnología",
+        "rubro_id": 8
+      }
+    },
+    {
+      "descripcion": "Fijo de Lima",
+      "frase": "51 1 234 5678 interesado rubro comercio",
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "telefono_e164": "+5112345678",
+        "telefono_local": "12345678",
+        "estado": "interesado"
+      }
+    },
+    {
+      "descripcion": "Fijo de Colombia (60)",
+      "frase": "57 601 234 5678 reunión rubro construcción",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "telefono_e164": "+576012345678",
+        "estado": "reunion",
+        "rubro": "Construcción"
+      }
+    },
+    {
+      "descripcion": "Colombia con veinticuatro / veinticinco / treinta y cuatro",
+      "frase": "cincuenta y siete trescientos dos veinticuatro veinticinco treinta y cuatro cero, interesado",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "telefono_e164": "+573022425340",
+        "estado": "interesado"
+      }
+    },
+    {
+      "descripcion": "Rubro nuevo que no está en el catálogo",
+      "frase": "51954016836 interesado rubro veterinaria",
+      "esperado": {
+        "valido": true,
+        "rubro": "Veterinaria",
+        "rubro_id": null,
+        "rubro_nuevo": true
+      }
+    },
+    {
+      "descripcion": "Nota al final",
+      "frase": "51954016836 reunión rubro salud, nota llamar el lunes a las 10",
+      "esperado": {
+        "valido": true,
+        "estado": "reunion",
+        "rubro": "Salud",
+        "nota": "Llamar el lunes a las 10"
+      }
+    },
+    {
+      "descripcion": "Estado dicho después del rubro",
+      "frase": "51954016836 rubro educación interesado",
+      "esperado": {
+        "valido": true,
+        "estado": "interesado",
+        "rubro": "Educación"
+      }
+    },
+    {
+      "descripcion": "Mayúsculas, tilde y signo +",
+      "frase": "Más 57 302 242 5340, Interesado",
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "telefono_e164": "+573022425340",
+        "estado": "interesado"
+      }
+    },
+    {
+      "descripcion": "ERROR: Perú sin código de país (sugiere Perú)",
+      "frase": "954016836 interesado",
+      "esperado": {
+        "valido": false,
+        "estado": "interesado",
+        "error_contiene": "Falta el código de país (51 o 57)",
+        "sugerencia_pais": "PE"
+      }
+    },
+    {
+      "descripcion": "ERROR: Colombia sin código de país (sugiere Colombia)",
+      "frase": "tres cero dos dos cuatro dos cinco tres cuatro cero reunión",
+      "esperado": {
+        "valido": false,
+        "error_contiene": "Falta el código de país (51 o 57)",
+        "sugerencia_pais": "CO"
+      }
+    },
+    {
+      "descripcion": "ERROR: Colombia con un dígito de menos",
+      "frase": "57302242534 interesado",
+      "esperado": {
+        "valido": false,
+        "pais": "CO",
+        "error_contiene": "Para Colombia se esperan 10 dígitos después del 57, se recibieron 9"
+      }
+    },
+    {
+      "descripcion": "ERROR: Perú con un dígito de más",
+      "frase": "519540168361 interesado",
+      "esperado": {
+        "valido": false,
+        "pais": "PE",
+        "error_contiene": "se esperan 9 dígitos después del 51, se recibieron 10"
+      }
+    },
+    {
+      "descripcion": "ERROR: Perú en letras con un dígito de menos",
+      "frase": "cinco uno nueve cinco cuatro cero uno seis ocho tres, interesado",
+      "esperado": {
+        "valido": false,
+        "pais": "PE",
+        "error_contiene": "se recibieron 8"
+      }
+    },
+    {
+      "descripcion": "ERROR: Colombia con dos dígitos de más",
+      "frase": "cincuenta y siete tres cero dos dos cuatro dos cinco tres cuatro cero uno uno no interesado",
+      "esperado": {
+        "valido": false,
+        "pais": "CO",
+        "error_contiene": "se recibieron 12"
+      }
+    },
+    {
+      "descripcion": "ERROR: código de otro país (52)",
+      "frase": "52 55 1234 5678 interesado",
+      "esperado": {
+        "valido": false,
+        "error_contiene": "Falta el código de país",
+        "sugerencia_pais": null
+      }
+    },
+    {
+      "descripcion": "ERROR: después del 57 no empieza en 3 ni 60",
+      "frase": "57 512 345 6789 interesado",
+      "esperado": {
+        "valido": false,
+        "pais": "CO",
+        "error_contiene": "debe empezar con 3 (celular) o 60 (fijo)"
+      }
+    },
+    {
+      "descripcion": "ERROR: sin estado",
+      "frase": "51954016836 rubro salud",
+      "esperado": {
+        "valido": false,
+        "estado": null,
+        "rubro": "Salud",
+        "error_contiene": "No se reconoció el estado"
+      }
+    },
+    {
+      "descripcion": "ERROR: sin número",
+      "frase": "interesado rubro salud",
+      "esperado": {
+        "valido": false,
+        "estado": "interesado",
+        "error_contiene": "No se detectó ningún número"
+      }
+    },
+    {
+      "descripcion": "Estado personalizado: no contesta",
+      "frase": "51954016836 no contesta",
+      "usar_estados": true,
+      "esperado": {
+        "valido": true,
+        "pais": "PE",
+        "estado": "no_contesta",
+        "rubro": null
+      }
+    },
+    {
+      "descripcion": "Estado personalizado más largo gana: reunión pendiente",
+      "frase": "573022425340, reunión pendiente, rubro salud",
+      "usar_estados": true,
+      "esperado": {
+        "valido": true,
+        "pais": "CO",
+        "estado": "reunion_pendiente",
+        "rubro": "Salud"
+      }
+    },
+    {
+      "descripcion": "Estado personalizado con palabra clave: llamar luego",
+      "frase": "cinco uno nueve cinco cuatro cero uno seis ocho tres seis llamar luego rubro educación",
+      "usar_estados": true,
+      "esperado": {
+        "valido": true,
+        "estado": "volver_a_llamar",
+        "rubro": "Educación"
+      }
+    },
+    {
+      "descripcion": "Estado personalizado: escribir al WhatsApp (no corta el número)",
+      "frase": "el número de whatsapp es 51954016836 escribir al whatsapp",
+      "usar_estados": true,
+      "esperado": {
+        "valido": true,
+        "telefono_e164": "+51954016836",
+        "estado": "escribir_al_whatsapp"
+      }
+    },
+    {
+      "descripcion": "Los básicos siguen funcionando con estados personalizados",
+      "frase": "57 302 242 5340 no le interesa rubro comercio",
+      "usar_estados": true,
+      "esperado": {
+        "valido": true,
+        "estado": "no_interesado",
+        "rubro": "Comercio"
+      }
+    },
+    {
+      "descripcion": "Seguimiento en mayúsculas",
+      "frase": "51987654321 SEGUIMIENTO",
+      "usar_estados": true,
+      "esperado": {
+        "valido": true,
+        "estado": "seguimiento"
+      }
+    }
+  ],
+  "estados": [
+    {
+      "clave": "interesado",
+      "nombre": "Interesado",
+      "palabras": null,
+      "orden": 1
+    },
+    {
+      "clave": "reunion",
+      "nombre": "Reunión",
+      "palabras": null,
+      "orden": 2
+    },
+    {
+      "clave": "medio_interesado",
+      "nombre": "Medio interesado",
+      "palabras": null,
+      "orden": 3
+    },
+    {
+      "clave": "no_interesado",
+      "nombre": "No interesado",
+      "palabras": null,
+      "orden": 4
+    },
+    {
+      "clave": "sin_respuesta",
+      "nombre": "Sin respuesta",
+      "palabras": null,
+      "orden": 10
+    },
+    {
+      "clave": "no_quiere",
+      "nombre": "No quiere",
+      "palabras": null,
+      "orden": 11
+    },
+    {
+      "clave": "no_contesta",
+      "nombre": "No contesta",
+      "palabras": "no contesto, no responde",
+      "orden": 12
+    },
+    {
+      "clave": "en_duda",
+      "nombre": "En duda",
+      "palabras": "duda, dudoso",
+      "orden": 13
+    },
+    {
+      "clave": "apagado",
+      "nombre": "Apagado",
+      "palabras": null,
+      "orden": 14
+    },
+    {
+      "clave": "otra_fecha",
+      "nombre": "Otra fecha",
+      "palabras": "otro dia",
+      "orden": 15
+    },
+    {
+      "clave": "volver_a_llamar",
+      "nombre": "Volver a llamar",
+      "palabras": "llamar despues, llamar luego",
+      "orden": 16
+    },
+    {
+      "clave": "pago_pendiente",
+      "nombre": "Pago pendiente",
+      "palabras": "falta pagar",
+      "orden": 17
+    },
+    {
+      "clave": "por_confirmar",
+      "nombre": "Por confirmar",
+      "palabras": null,
+      "orden": 18
+    },
+    {
+      "clave": "potencial",
+      "nombre": "Potencial",
+      "palabras": "posible cliente",
+      "orden": 19
+    },
+    {
+      "clave": "reunion_pendiente",
+      "nombre": "Reunión pendiente",
+      "palabras": null,
+      "orden": 20
+    },
+    {
+      "clave": "escribir_al_whatsapp",
+      "nombre": "Escribir al WhatsApp",
+      "palabras": "escribir por whatsapp, mandar whatsapp",
+      "orden": 21
+    },
+    {
+      "clave": "seguimiento",
+      "nombre": "Seguimiento",
+      "palabras": "hacer seguimiento",
+      "orden": 22
+    }
+  ]
+}
