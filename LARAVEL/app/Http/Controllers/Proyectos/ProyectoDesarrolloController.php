@@ -75,10 +75,12 @@ class ProyectoDesarrolloController extends Controller
 
         // Días hábiles (lunes a viernes) a partir del inicio del proyecto o de hoy.
         $desde = \Illuminate\Support\Carbon::parse($data['desde'] ?? $proyecto->start_date ?? today());
-        $fin = $desde->copy()->addWeekdays($data['estimacion_dias']);
+        // El formulario envía texto ("10"); Carbon 3 exige un número.
+        $dias = (int) $data['estimacion_dias'];
+        $fin = $desde->copy()->addWeekdays($dias);
 
         $proyecto->update([
-            'estimacion_dias'      => $data['estimacion_dias'],
+            'estimacion_dias'      => $dias,
             'estimacion_detalle'   => $data['estimacion_detalle'] ?? null,
             'estimacion_fecha_fin' => $fin,
             'estimado_por'         => auth()->id(),
